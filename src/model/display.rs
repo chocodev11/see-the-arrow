@@ -123,6 +123,15 @@ impl Screens {
         Ok(global)
     }
 
+    /// The rect around every display, the area a screen capture can read.
+    pub fn bounds(&self) -> Rect {
+        self.displays
+            .iter()
+            .map(|display| display.frame)
+            .reduce(|all, frame| all.union(&frame))
+            .unwrap_or_default()
+    }
+
     /// One line describing every display, for error messages.
     pub fn summary(&self) -> String {
         self.displays
@@ -206,5 +215,6 @@ mod tests {
         );
         assert!(screens.global(Point::new(1.0, 1.0), Some(99)).is_err());
         assert!(screens.global(Point::new(5000.0, 1.0), Some(1)).is_err());
+        assert_eq!(screens.bounds(), Rect::new(-1920.0, -300.0, 4800.0, 2100.0));
     }
 }

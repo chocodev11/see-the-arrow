@@ -4,6 +4,7 @@
 use std::collections::{BTreeMap, HashSet};
 
 use super::config::TargetSpec;
+use super::output;
 use crate::model::display::Screens;
 use crate::model::error::{Error, Result};
 use crate::model::geom::Point;
@@ -61,12 +62,8 @@ pub fn frontmost_app(list: &WindowList) -> Result<AppInfo> {
         .ok_or_else(|| Error::unresolvable("no frontmost app, pass --app"))
 }
 
-fn window(
-    query: &WindowQuery,
-    anchor: WindowAnchor,
-    anchor_name: &str,
-    screens: &Screens,
-) -> Result<ResolvedTarget> {
+/// The windows a `--window` query names, front first and never empty, with their app's name.
+pub fn windows_named(query: &WindowQuery, screens: &Screens) -> Result<(String, Vec<WindowInfo>)> {
     let list = platform::window_list()?;
     let apps = matcher::apps_matching(&query.app, &list.apps);
     let Some(first) = apps.first() else {
@@ -77,13 +74,16 @@ fn window(
         )));
     };
     let pids: Vec<u32> = apps.iter().map(|app| app.pid).collect();
-    let windows = matcher::windows_of(
+    let windows: Vec<WindowInfo> = matcher::windows_of(
         &pids,
         &list.windows,
         query.title.as_deref(),
         &screens.displays,
-    );
-    let Some(front) = windows.first() else {
+    )
+    .into_iter()
+    .cloned()
+    .collect();
+    if windows.is_empty() {
         return Err(Error::unresolvable(match &query.title {
             Some(title) => format!(
                 "{} has no window titled '*{title}*' on screen",
@@ -91,7 +91,18 @@ fn window(
             ),
             None => format!("{} has no visible window on screen", first.name()),
         }));
-    };
+    }
+    Ok((first.name().to_owned(), windows))
+}
+
+fn window(
+    query: &WindowQuery,
+    anchor: WindowAnchor,
+    anchor_name: &str,
+    screens: &Screens,
+) -> Result<ResolvedTarget> {
+    let (app, windows) = windows_named(query, screens)?;
+    let front = &windows[0];
     let part = matcher::visible_part(&front.bounds, &screens.displays);
     let scale = screens
         .containing(part.center())
@@ -103,7 +114,7 @@ fn window(
     );
     let mut target = ResolvedTarget::new(TargetShape::Point(point), "window");
     target.detail = BTreeMap::from([
-        ("app".to_owned(), first.name().to_owned()),
+        ("app".to_owned(), app),
         ("anchor".to_owned(), anchor_name.to_owned()),
         ("windowCount".to_owned(), windows.len().to_string()),
     ]);
@@ -255,6 +266,21 @@ pub fn raise(app: &str, title: Option<&str>, screens: &Screens) -> Result<Raised
         window: title.map(str::to_owned),
         handle,
     })
+}
+
+/// Brings the app of `home` to the front before acting on it. When the system keeps it back,
+/// flashes its taskbar button and says that the caller goes on `anyway`.
+pub fn raise_or_warn(home: &WindowQuery, anyway: &str) -> Result<()> {
+    let screens = platform::screens()?;
+    let raised = raise(&home.app, home.title.as_deref(), &screens)?;
+    if !raised.frontmost {
+        platform::flash(raised.handle);
+        output::print_error(&format!(
+            "bigarrow: {} did not come to the front within 1.5 s, {anyway}",
+            raised.app
+        ));
+    }
+    Ok(())
 }
 
 /// True while another app's window covers `point`.

@@ -2,7 +2,7 @@
 
 use serde_json::{Map, Value};
 
-use crate::model::geom::Point;
+use crate::model::geom::{Point, Rect};
 use crate::model::matcher::{AppInfo, WindowInfo};
 
 #[cfg(windows)]
@@ -54,6 +54,18 @@ pub struct PixelRect {
 }
 
 impl PixelRect {
+    /// The smallest pixel rect covering `rect`, at least one pixel wide and high.
+    pub fn enclosing(rect: Rect) -> PixelRect {
+        let (left, top) = (rect.x.floor(), rect.y.floor());
+        let (right, bottom) = (rect.max_x().ceil(), rect.max_y().ceil());
+        PixelRect {
+            x: left as i32,
+            y: top as i32,
+            width: (right - left).max(1.0) as u32,
+            height: (bottom - top).max(1.0) as u32,
+        }
+    }
+
     pub fn intersect(&self, other: &PixelRect) -> Option<PixelRect> {
         let left = self.x.max(other.x);
         let top = self.y.max(other.y);
@@ -82,7 +94,7 @@ pub struct Capabilities {
     pub os: String,
     /// `--element` and `elements` can read UI elements.
     pub accessibility: bool,
-    /// There is no screen-recording gate outside macOS; kept for `--require screen-recording`.
+    /// `screenshot` can read the screen; no permission gates it outside macOS.
     pub screen_recording: bool,
     /// Platform-specific `doctor --json` fields.
     pub extra: Map<String, Value>,

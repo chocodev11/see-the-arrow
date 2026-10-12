@@ -39,4 +39,7 @@ jobs:
       - name: Build release
         run: cargo build --release
       - name: Test
+        # Xvfb is a real X server: screenshot tests read it and draw on it.
+        env:
+          BIGARROW_SCREEN_TESTS: "1"
         run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" cargo test

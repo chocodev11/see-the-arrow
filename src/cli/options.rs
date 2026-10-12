@@ -221,6 +221,39 @@ pub struct ElementsArgs {
 }
 
 #[derive(Args, Debug, Clone)]
+pub struct ScreenshotArgs {
+    /// Capture an app's front window, optionally by title: 'Blender' or 'Google Chrome:Inbox'.
+    /// It comes to the front first.
+    #[arg(long, value_name = "app[:title]")]
+    pub window: Option<String>,
+
+    /// Capture the rect x,y,w,h in global top-left coordinates.
+    #[arg(long, value_name = "x,y,w,h", allow_hyphen_values = true)]
+    pub rect: Option<String>,
+
+    /// Capture display N (1-based, see 'bigarrow doctor'); with --rect, the rect is relative to it.
+    #[arg(long, value_name = "n", allow_negative_numbers = true)]
+    pub display: Option<i64>,
+
+    /// The PNG to write.
+    #[arg(long, value_name = "file")]
+    pub png: String,
+
+    /// Shrink the image until its longer side is at most this many pixels. Vision models shrink
+    /// large images on their own, which shifts every coordinate read from them.
+    #[arg(long = "max-size", value_name = "pixels", value_parser = clap::value_parser!(u32).range(16..))]
+    pub max_size: Option<u32>,
+
+    /// With --window: leave the windows as they are.
+    #[arg(long = "no-raise")]
+    pub no_raise: bool,
+
+    /// Print JSON.
+    #[arg(long)]
+    pub json: bool,
+}
+
+#[derive(Args, Debug, Clone)]
 pub struct DoctorArgs {
     /// Print JSON.
     #[arg(long)]

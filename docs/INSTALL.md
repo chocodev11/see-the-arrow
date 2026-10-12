@@ -4,7 +4,8 @@ This page is for an AI agent (Claude Code, Codex, ...) that a human asked to ins
 Run the steps in order yourself; ask the human only where a step says so.
 
 see-the-arrow draws a big click-through arrow with a sign to show the human where to click. Its
-command is `bigarrow`. It never clicks, never types and never captures the screen.
+command is `bigarrow`. It never clicks and never types; it reads the screen only when
+`bigarrow screenshot` runs, into the file named.
 
 ## 1. Check the machine
 

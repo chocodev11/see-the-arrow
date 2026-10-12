@@ -21,7 +21,8 @@ make it differ. Keep that compatibility: subcommands, flags, defaults, messages,
 
 - Layout runs in display-local points, so the look constants hold on every scale; coordinates in and out are
   global input units (physical pixels on Windows, root pixels on X11). Convert with `Display`.
-- Drawing needs no permission. Never steal the focus: no activation, no synthetic input.
+- Drawing needs no permission. Never steal the focus: no activation, no synthetic input. The
+  screen is read only by `screenshot`, into the file it is given.
 - Every arrow ends by itself (duration, `stop`, owner exit, display gone). No default lifetime
   may outlive the agent session.
 - The session never blocks: UI Automation and AT-SPI calls that can hang run on another thread.

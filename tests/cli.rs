@@ -337,3 +337,20 @@ fn png_renders_offscreen() {
     assert_eq!(&data[1..4], b"PNG");
     let _ = std::fs::remove_file(file);
 }
+
+#[test]
+fn screenshot_arguments_are_checked_before_the_screen_is_read() {
+    let file = std::env::temp_dir().join(format!("bigarrow-test-shot-{}.png", std::process::id()));
+    let png = file.to_str().unwrap();
+    assert_eq!(run(&["screenshot"]).code, 2);
+    for args in [
+        ["--window", "Notepad", "--rect", "0,0,10,10"],
+        ["--window", "Notepad", "--display", "1"],
+        ["--max-size", "0", "--display", "1"],
+        ["--rect", "99999,99999,10,10", "--display", "1"],
+    ] {
+        let result = run(&[&["screenshot", "--png", png], &args[..]].concat());
+        assert_eq!(result.code, 2, "{args:?}: {}", result.stderr);
+    }
+    assert!(!file.exists());
+}

@@ -32,14 +32,19 @@ pub fn write(scene: &Scene, file: &Path) -> Result<[i64; 3]> {
         &FrameState::FINAL,
         None,
     );
-    let failed = |_| Error::bad_input(format!("cannot write a PNG to {}", file.display()));
-    let data = pixmap
-        .encode_png()
-        .map_err(|_| Error::bad_input("cannot encode the PNG"))?;
-    std::fs::write(file, data).map_err(failed)?;
+    save(&pixmap, file)?;
     Ok([
         (display.frame.x + left) as i64,
         (display.frame.y + top) as i64,
         1,
     ])
+}
+
+/// Writes `pixmap` to `file` as a PNG, with no metadata.
+pub fn save(pixmap: &Pixmap, file: &Path) -> Result<()> {
+    let failed = |_| Error::bad_input(format!("cannot write a PNG to {}", file.display()));
+    let data = pixmap
+        .encode_png()
+        .map_err(|_| Error::bad_input("cannot encode the PNG"))?;
+    std::fs::write(file, data).map_err(failed)
 }

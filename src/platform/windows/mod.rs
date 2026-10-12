@@ -2,8 +2,10 @@
 //! DPI aware, so every coordinate is a physical pixel of the virtual screen.
 
 mod apps;
+mod capture;
 mod overlay;
 mod speech;
+mod surface;
 mod uia;
 
 use std::os::windows::process::CommandExt;
@@ -41,6 +43,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::core::{BOOL, HSTRING, PCWSTR, w};
 
 pub use apps::{activate, title_bar_center, window_list};
+pub use capture::capture;
 pub use overlay::{Overlay, Waker};
 pub use speech::Speech;
 pub use uia::{elements, select_tab};

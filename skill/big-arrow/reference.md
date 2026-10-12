@@ -27,8 +27,13 @@ with `--app "Google Chrome:<tab title>"`. Check with `--dry-run --json` or `--pn
 
 ## Coordinates from a screenshot
 
-Global top-left physical pixels: display origin (`bigarrow doctor`) + pixel in a full-resolution
-screenshot of that display. A downscaled screenshot: multiply by source width / output width.
+`bigarrow screenshot --png shot.png --json` captures the primary display; `--display N`, `--window
+"App[:title]"` (raised first unless `--no-raise`) or `--rect x,y,w,h` pick another area. The JSON
+gives `rect` (the area, global pixels) and `size` (the PNG): image pixel (x, y) is global
+(rect x + x * rect w / size w, rect y + y * rect h / size h). Use `--max-size 1280`: vision models
+shrink larger images on their own and every coordinate read from them shifts. The capture shows
+live arrows too; `bigarrow stop` first for a clean one, or keep them to check where they point.
+Exit 4: a locked screen (Windows), Wayland or XWayland (Linux).
 `--display N` makes `--at` and `--rect` relative to display N (1-based).
 
 ## Look

@@ -80,3 +80,16 @@ pub struct ClearResult {
     pub cleared: Vec<u32>,
     pub ok: bool,
 }
+
+/// The `--json` result of `screenshot`. Image pixel (x, y) shows the global pixel
+/// (rect x + x * rect width / size width, rect y + y * rect height / size height).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct ScreenshotResult {
+    pub ok: bool,
+    /// The PNG, as an absolute path.
+    pub path: String,
+    /// The captured area: x, y, width, height in global input units.
+    pub rect: [i64; 4],
+    /// The PNG's width and height; smaller than the rect after `--max-size`.
+    pub size: [i64; 2],
+}

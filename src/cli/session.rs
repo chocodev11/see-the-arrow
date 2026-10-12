@@ -614,7 +614,8 @@ impl PulseFrames {
     fn draw(planned: &Planned, window: PixelRect, copied: Option<usize>) -> Option<Self> {
         let scene = &planned.scene;
         let display = &scene.layout.display;
-        let dirty = pixel_rect(display.global_rect(&scene.pulse_bounds())).intersect(&window)?;
+        let dirty =
+            PixelRect::enclosing(display.global_rect(&scene.pulse_bounds())).intersect(&window)?;
         let reach = (25.0 * display.scale).ceil() as i32;
         let source = dirty.grown(reach).intersect(&window)?;
         let origin = display.local(Point::new(f64::from(source.x), f64::from(source.y)));
@@ -645,27 +646,16 @@ impl PulseFrames {
 /// The window around everything the arrow can cover, global pixels, inside its display.
 fn window_rect(planned: &Planned) -> PixelRect {
     let display = &planned.scene.layout.display;
-    let rect = pixel_rect(display.global_rect(&planned.scene.bounds()));
-    rect.intersect(&pixel_rect(display.frame)).unwrap_or(rect)
+    let rect = PixelRect::enclosing(display.global_rect(&planned.scene.bounds()));
+    rect.intersect(&PixelRect::enclosing(display.frame))
+        .unwrap_or(rect)
 }
 
 fn pulse_area(planned: &Planned, window: PixelRect) -> u64 {
     let display = &planned.scene.layout.display;
-    pixel_rect(display.global_rect(&planned.scene.pulse_bounds()))
+    PixelRect::enclosing(display.global_rect(&planned.scene.pulse_bounds()))
         .intersect(&window)
         .map_or(0, |rect| u64::from(rect.width) * u64::from(rect.height))
-}
-
-/// The smallest pixel rect covering `rect`.
-fn pixel_rect(rect: Rect) -> PixelRect {
-    let (left, top) = (rect.x.floor(), rect.y.floor());
-    let (right, bottom) = (rect.max_x().ceil(), rect.max_y().ceil());
-    PixelRect {
-        x: left as i32,
-        y: top as i32,
-        width: (right - left).max(1.0) as u32,
-        height: (bottom - top).max(1.0) as u32,
-    }
 }
 
 /// Copies `dirty` (global pixels) from `part` (covering `source`) into `frame` (covering `window`).

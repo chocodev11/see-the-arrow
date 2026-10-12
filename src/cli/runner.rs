@@ -32,15 +32,7 @@ pub fn run(config: PointConfig) -> Result<()> {
         && config.png.is_none()
         && let Some(home) = &config.home
     {
-        let screens = platform::screens()?;
-        let raised = targeting::raise(&home.app, home.title.as_deref(), &screens)?;
-        if !raised.frontmost {
-            platform::flash(raised.handle);
-            output::print_error(&format!(
-                "bigarrow: {} did not come to the front within 1.5 s, pointing anyway (the arrow shows once it is visible)",
-                raised.app
-            ));
-        }
+        targeting::raise_or_warn(home, "pointing anyway (the arrow shows once it is visible)")?;
     }
     let screens = platform::screens()?;
     let resolved = targeting::resolve(&config.target, &screens)?;

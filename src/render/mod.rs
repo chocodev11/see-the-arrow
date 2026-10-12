@@ -3,6 +3,7 @@
 pub mod animation;
 pub mod click;
 pub mod png;
+pub mod scale;
 pub mod scene;
 pub mod sign;
 pub mod text;

@@ -12,6 +12,7 @@ mod install_skill;
 mod options;
 mod output;
 mod runner;
+mod screenshot;
 mod session;
 mod targeting;
 
@@ -21,6 +22,7 @@ use crate::model::error::Error;
 use config::{Mode, PointConfig};
 use options::{
     ClearArgs, DemoArgs, DoctorArgs, ElementsArgs, FrontArgs, InstallSkillArgs, PointArgs,
+    ScreenshotArgs,
 };
 
 const POINT_EXAMPLES: &str = "\
@@ -86,6 +88,18 @@ enum Command {
     /// List the visible, labelled UI elements of an app that --element can point at.
     #[command(args_override_self = true)]
     Elements(ElementsArgs),
+    /// Save what the screen shows to a PNG, in the pixels --at and --rect use.
+    #[command(
+        long_about = "Save what the screen shows to a PNG, in the pixels --at and --rect use.\n\n\
+            Captures the primary display, --display N, an app's --window or --rect x,y,w,h, arrows included. \
+            Image pixel (x, y) is the global pixel (rect x + x * rect width / image width, \
+            rect y + y * rect height / image height); --json prints rect and size. \
+            bigarrow reads the screen only when this command runs, and writes only the file given.\n\n\
+            \x20 bigarrow screenshot --window blender --png shot.png --max-size 1280 --json\n\
+            \x20 bigarrow point --at 412,236 --app blender --text \"Click Add\"",
+        args_override_self = true
+    )]
+    Screenshot(ScreenshotArgs),
     /// Show what this session can do (UI Automation / AT-SPI, elevation) and the displays.
     #[command(args_override_self = true)]
     Doctor(DoctorArgs),
@@ -131,6 +145,7 @@ pub fn main() -> i32 {
         Some(Command::Clear(args)) => clear::run(args),
         Some(Command::Front(args)) => front::run(args),
         Some(Command::Elements(args)) => elements::run(args),
+        Some(Command::Screenshot(args)) => screenshot::run(args),
         Some(Command::Doctor(args)) => doctor::run(args),
         Some(Command::Demo(args)) => demo::run(args),
         Some(Command::InstallSkill(args)) => install_skill::run(args),

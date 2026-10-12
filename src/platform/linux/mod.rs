@@ -3,6 +3,7 @@
 //! because Wayland does not tell apps where windows are.
 
 mod atspi;
+mod capture;
 mod overlay;
 mod x11;
 
@@ -13,6 +14,7 @@ use std::process::{Child, Command, Stdio};
 use serde_json::Map;
 
 pub use self::atspi::elements;
+pub use capture::capture;
 pub use overlay::{Overlay, Waker};
 pub use x11::{activate, screens, window_list};
 
@@ -153,7 +155,7 @@ pub fn capabilities() -> Capabilities {
     Capabilities {
         os: os_name(),
         accessibility: accessibility && !wayland(),
-        screen_recording: true,
+        screen_recording: !wayland(),
         extra,
         lines,
     }

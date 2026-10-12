@@ -15,9 +15,7 @@ use windows::Win32::Foundation::{
     WAIT_OBJECT_0, WPARAM,
 };
 use windows::Win32::Graphics::Gdi::{
-    AC_SRC_ALPHA, AC_SRC_OVER, BITMAPINFO, BITMAPINFOHEADER, BLENDFUNCTION, ClientToScreen,
-    CreateCompatibleDC, CreateDIBSection, DIB_RGB_COLORS, DeleteDC, DeleteObject, HBITMAP, HDC,
-    HGDIOBJ, SelectObject,
+    AC_SRC_ALPHA, AC_SRC_OVER, BLENDFUNCTION, ClientToScreen, HDC,
 };
 use windows::Win32::System::Console::SetConsoleCtrlHandler;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
@@ -44,6 +42,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 use windows::core::{BOOL, HSTRING, w};
 
 use super::pointer;
+use super::surface::Surface;
 use crate::model::error::{Error, Result};
 use crate::model::geom::Point;
 use crate::platform::{Event, PixelRect};
@@ -87,63 +86,6 @@ pub struct Waker(isize);
 impl Waker {
     pub fn wake(&self) {
         let _ = unsafe { SetEvent(HANDLE(self.0 as _)) };
-    }
-}
-
-/// A 32-bit top-down DIB section with a memory DC, premultiplied BGRA.
-struct Surface {
-    dc: HDC,
-    bitmap: HBITMAP,
-    previous: HGDIOBJ,
-    bits: *mut u8,
-    width: u32,
-    height: u32,
-}
-
-impl Surface {
-    fn new(width: u32, height: u32) -> Result<Self> {
-        let info = BITMAPINFO {
-            bmiHeader: BITMAPINFOHEADER {
-                biSize: size_of::<BITMAPINFOHEADER>() as u32,
-                biWidth: width as i32,
-                biHeight: -(height as i32),
-                biPlanes: 1,
-                biBitCount: 32,
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-        let failed = || Error::bad_input("cannot create the overlay bitmap");
-        let dc = unsafe { CreateCompatibleDC(None) };
-        let mut bits = std::ptr::null_mut();
-        let bitmap =
-            unsafe { CreateDIBSection(Some(dc), &info, DIB_RGB_COLORS, &mut bits, None, 0) }
-                .map_err(|_| failed())?;
-        let previous = unsafe { SelectObject(dc, bitmap.into()) };
-        Ok(Self {
-            dc,
-            bitmap,
-            previous,
-            bits: bits as *mut u8,
-            width,
-            height,
-        })
-    }
-
-    fn pixels(&mut self) -> &mut [u8] {
-        unsafe {
-            std::slice::from_raw_parts_mut(self.bits, (self.width * self.height * 4) as usize)
-        }
-    }
-}
-
-impl Drop for Surface {
-    fn drop(&mut self) {
-        unsafe {
-            SelectObject(self.dc, self.previous);
-            let _ = DeleteObject(self.bitmap.into());
-            let _ = DeleteDC(self.dc);
-        }
     }
 }
 
