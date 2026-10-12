@@ -264,10 +264,9 @@ impl Overlay {
         let source = pixmap.data();
         let mut data = Vec::with_capacity(width * height * 4);
         for y in top..top + height {
-            for pixel in
-                source[y * stride + left * 4..y * stride + (left + width) * 4].chunks_exact(4)
-            {
-                data.extend_from_slice(&[pixel[2], pixel[1], pixel[0], pixel[3]]);
+            let row = &source[y * stride + left * 4..y * stride + (left + width) * 4];
+            for &[r, g, b, a] in row.as_chunks::<4>().0 {
+                data.extend_from_slice(&[b, g, r, a]);
             }
         }
         if let Ok(image) = Image::new(
@@ -283,7 +282,7 @@ impl Overlay {
         }
         if !self.composited && dirty.is_none() {
             // No translucency: cut the window to the drawn pixels instead.
-            let alpha: Vec<u8> = source.chunks_exact(4).map(|pixel| pixel[3]).collect();
+            let alpha: Vec<u8> = source.iter().skip(3).step_by(4).copied().collect();
             let rects = rectangles(
                 &alpha,
                 self.rect.width as usize,

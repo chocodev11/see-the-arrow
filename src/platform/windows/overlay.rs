@@ -303,8 +303,8 @@ impl Overlay {
     /// Alpha 255 bytes in `mask` become clickable, everything else clicks through.
     pub fn set_hit_mask(&mut self, mask: &[u8]) {
         let target = self.hit_surface.pixels();
-        for (pixel, &alpha) in target.chunks_exact_mut(4).zip(mask) {
-            pixel.copy_from_slice(&[0, 0, 0, u8::from(alpha > 0)]);
+        for (pixel, &alpha) in target.as_chunks_mut::<4>().0.iter_mut().zip(mask) {
+            *pixel = [0, 0, 0, u8::from(alpha > 0)];
         }
         update(self.hit, self.rect, Some(self.hit_surface.dc), 255, None);
     }
