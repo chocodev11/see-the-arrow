@@ -31,9 +31,9 @@ front; the arrow hides while another app covers the target.
 Every arrow ends by itself: time limit (point 8 s, start 300 s), 'stop',
 or when the agent that drew it exits (CLAUDE_PID, BIGARROW_OWNER_PID).
 
-  bigarrow point --at 760,500 --text \"Franz, click HERE\" --duration 10
+  bigarrow point --at 760,500 --text \"Click HERE\" --duration 10
   bigarrow start --rect 400,300,200,40 --app \"Google Chrome:Sign in\" \\
-    --text \"Franz, sign in\"      then      bigarrow stop
+    --text \"Sign in here\"      then      bigarrow stop
 
 More examples:
   bigarrow point --window \"Google Chrome\" --anchor title --text \"This window\"

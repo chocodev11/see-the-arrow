@@ -1,6 +1,6 @@
 ---
 name: big-arrow
-description: "Point at something on the human's screen (Windows, or Linux on X11) with a big arrow and a sign (\"Franz, click HERE\") using the bigarrow CLI. Use whenever the human has to look at, click, type into or choose a specific spot, button, field, window, tab or menu: show me where, point to it, which button, where do I click, chỉ cho tôi chỗ nào, guide me through this UI, the human must approve or sign something, or you need the human's hand and they may not be looking at the terminal. Mandatory when it is time-critical: a code that expires, a login or payment page that times out, a build waiting on the human."
+description: "Point at something on the human's screen (Windows, or Linux on X11) with a big arrow and a sign (\"Click Save: keeps your changes\") using the bigarrow CLI. Use whenever the human has to look at, click, type into or choose a specific spot, button, field, window, tab or menu: show me where, point to it, which button, where do I click, chỉ cho tôi chỗ nào, guide me through this UI, the human must approve or sign something, or you need the human's hand and they may not be looking at the terminal. Mandatory when it is time-critical: a code that expires, a login or payment page that times out, a build waiting on the human."
 license: MIT
 allowed-tools: Bash(bigarrow:*)
 metadata:
@@ -14,7 +14,7 @@ takes the focus. Point at the thing itself, a line in the terminal is easy to mi
 
 ```bash
 start ms-settings:privacy-webcam        # PowerShell: Start-Process ms-settings:privacy-webcam
-bigarrow start --element "Camera access" --app "Settings" --text "Franz, switch this on: apps may use the camera" --say
+bigarrow start --element "Camera access" --app "Settings" --text "Switch this on: apps may use the camera" --say
 # watch for the result (page changed, job continued, file appeared), then:
 bigarrow stop
 ```
@@ -23,15 +23,16 @@ bigarrow stop
 
 - Open the exact page or URL yourself, then point at the one control left for the human. Never
   walk them through menus. The human clicks; you point.
-- The sign is one full sentence naming the action ("Franz, click Save", never "here"). When the
-  click approves, grants, pays, signs, sends or deletes, add what happens: "Franz, click Pay:
-  49 EUR to Hetzner". The human decides; the facts go on the sign, not only in the terminal.
+- The sign is one full sentence naming the action ("Click Save", never "here"); start with the
+  human's name only when you know it. When the click approves, grants, pays, signs, sends or
+  deletes, add what happens: "Click Pay: 12 USD for the domain renewal". The human decides; the
+  facts go on the sign, not only in the terminal.
 - `--say` when the human may not be looking. Time-critical (code expires, page times out, job
-  waits): `--color red --say` and say by when: "Franz, enter the 2FA code now, it expires in 60 s".
+  waits): `--color red --say` and say by when: "Enter the 2FA code now, it expires in 60 s".
 - Something to paste (a command you may not run, a URL, a code): put it on the sign as
   `{{value}}`. The human sees the value on a copy button (no braces); one click copies all of it
-  and the arrow stays. Point at where it goes: "Franz, copy {{winget upgrade --all}} and paste
-  it here", then check that it was pasted.
+  and the arrow stays. Point at where it goes: "Copy {{winget upgrade --all}} and paste it
+  here", then check that it was pasted.
 - One arrow per step; `bigarrow stop` the moment the step is done. Arrows also end alone: after
   300 s, when your session exits, when the human answers (hook below).
 - A click on the sign or shaft, except a copy button, removes the arrow (target clicks pass

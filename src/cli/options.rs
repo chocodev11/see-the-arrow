@@ -47,7 +47,7 @@ pub struct TargetOptions {
 
 #[derive(Args, Debug, Clone)]
 pub struct LookOptions {
-    /// The sign. Write a full sentence: 'Franz, click Allow'. {{value}} shows value with a copy button.
+    /// The sign. Write a full sentence: 'Click Allow'. {{value}} shows value with a copy button.
     #[arg(long, value_name = "text")]
     pub text: String,
 
