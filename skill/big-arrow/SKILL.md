@@ -52,6 +52,9 @@ Two ways to use it:
 - A click on the sign or shaft, except a copy button, removes the arrow (target clicks pass
   through). A removed arrow was seen: check the result, do not redraw. Skip `--close-button`
   unless asked.
+- A screenshot you read goes to your model provider. Capture only the window of the app you are
+  pointing in (`--window "<App>"`), never the whole screen, and none at all while a password
+  manager, a banking page or private messages are open.
 
 ## Teaching
 

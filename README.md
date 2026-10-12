@@ -26,13 +26,14 @@ into the file the agent names.
 
 ## Try it
 
-```powershell
-cargo install see-the-arrow --locked   # or a prebuilt binary, see Install
-bigarrow install-skill                 # teaches Claude Code and Codex to use it
-bigarrow point --at 960,540 --text "Click here"
+Ask your agent (Claude Code, Codex, ...):
+
+```text
+Install see-the-arrow on this machine.
+Follow https://raw.githubusercontent.com/chocodev11/see-the-arrow/main/docs/INSTALL.md
 ```
 
-Then ask your agent:
+It downloads `bigarrow`, installs the agent skill and shows a first arrow. Then ask:
 
 ```text
 Teach me to add a monkey head in Blender. Point at each step on my screen and let me click.
@@ -146,19 +147,15 @@ around it gives the signs the most room; a maximized one leaves them nowhere to 
 
 ## Install
 
-Ask your agent (Claude Code, Codex, ...):
-
-```text
-Install see-the-arrow on this machine.
-Follow https://raw.githubusercontent.com/chocodev11/see-the-arrow/main/docs/INSTALL.md
-```
-
-It downloads `bigarrow` for Windows (x64) or Linux (x86-64, glibc 2.35 or newer) from the
-[latest release](https://github.com/chocodev11/see-the-arrow/releases/latest), installs the agent
-skill and shows a first arrow. By hand:
+The prompt in [Try it](#try-it) has your agent download `bigarrow` for Windows (x64) or Linux
+(x86-64, glibc 2.35 or newer) from the
+[latest release](https://github.com/chocodev11/see-the-arrow/releases/latest), install the agent
+skill and show a first arrow. By hand: unpack that archive, put `bigarrow` on your `PATH`, then
+run `bigarrow install-skill`. From source, with Rust 1.89 or newer (on Windows Rust also needs the
+Visual Studio Build Tools):
 
 ```powershell
-cargo install see-the-arrow --locked   # Rust 1.89 or newer
+cargo install see-the-arrow --locked
 bigarrow install-skill                 # Claude Code (~/.claude/skills) and Codex (~/.agents/skills)
 ```
 
@@ -198,6 +195,13 @@ Exit codes: 0 ok, 2 bad input, 3 target not found, 4 permission missing.
 ## FAQ
 
 **Does it click or type for me?** No. Pressing the button stays the human's job; that is the point.
+
+**What does the agent see, and where do screenshots go?** Nothing until it runs
+`bigarrow screenshot`, which writes a PNG on your machine and sends it nowhere. The agent then
+reads that file, so the image goes to your model provider, just as if you had pasted it into the
+chat yourself. `--window App` captures only the area of that window, after bringing it to the
+front; the skill tells agents to capture only the app they are teaching, and nothing while a
+password manager, a bank or private messages are open.
 
 **Will it steal my keyboard while I type?** No. The arrow's windows can never be activated. Only
 bringing the target window forward changes the focus, and `--no-raise` turns that off.
@@ -246,7 +250,7 @@ see-the-arrow follows Windows and Linux:
 - **Linux:** Wayland sessions draw through XWayland, but `--mouse`, `--window`, `--element`,
   `--until-click`, `screenshot` and hiding while covered need X11 and exit 4 there. XWayland never
   lets apps read the screen, WSLg included. Without a compositor there is
-  no shadow and edges are hard. On X11 a copied value lives as long as the arrow unless a clipboard
+  no shadow, edges are hard and a screenshot may leave the arrows out. On X11 a copied value lives as long as the arrow unless a clipboard
   manager takes it.
 - Colour emoji are drawn in one colour or not at all.
 

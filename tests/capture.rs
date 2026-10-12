@@ -1,10 +1,11 @@
 //! `screenshot` on the real screen. Opt-in with `BIGARROW_SCREEN_TESTS=1`, because these read the
 //! screen of whoever runs them and draw an arrow on it.
+//!
+//! A test that fails keeps the lock poisoned; the others still run, so take it back.
 
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
-use std::time::Duration;
 
 use tiny_skia::Pixmap;
 
@@ -50,7 +51,7 @@ fn temp(name: &str) -> PathBuf {
 
 #[test]
 fn a_rect_comes_back_pixel_for_pixel_and_shrinks_on_request() {
-    let _screen = SCREEN.lock().unwrap();
+    let _screen = SCREEN.lock().unwrap_or_else(|poison| poison.into_inner());
     if !enabled() {
         return;
     }
@@ -82,9 +83,12 @@ fn a_rect_comes_back_pixel_for_pixel_and_shrinks_on_request() {
     let _ = std::fs::remove_file(file);
 }
 
+/// Windows only: without a compositor (Xvfb in CI), X11 leaves the pixels of the arrow's 32-bit
+/// window undefined in a capture of the root window.
+#[cfg(windows)]
 #[test]
 fn an_arrow_is_where_its_sign_says() {
-    let _screen = SCREEN.lock().unwrap();
+    let _screen = SCREEN.lock().unwrap_or_else(|poison| poison.into_inner());
     if !enabled() {
         return;
     }
@@ -112,7 +116,7 @@ fn an_arrow_is_where_its_sign_says() {
         .map(|value| value.as_i64().unwrap().to_string())
         .collect();
     // The first frame is up when `start` returns; give the compositor a few frames.
-    std::thread::sleep(Duration::from_millis(300));
+    std::thread::sleep(std::time::Duration::from_millis(300));
     let file = temp("sign");
     let (code, shot) = bigarrow(&[
         "screenshot",
