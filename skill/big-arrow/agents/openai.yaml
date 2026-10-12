@@ -1,0 +1,8 @@
+# Codex reads this optional file for its skill list; Claude Code ignores the agents/ folder.
+# https://learn.chatgpt.com/docs/build-skills
+interface:
+  display_name: "Big Arrow"
+  short_description: "Point at the screen with a big arrow and a sign"
+  default_prompt: "Show me where to click"
+policy:
+  allow_implicit_invocation: true

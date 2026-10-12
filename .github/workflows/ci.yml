@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Lint
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Build release
+        run: cargo build --release
+      - name: Test
+        # The runner has a desktop: the overlay tests draw on it.
+        env:
+          BIGARROW_SCREEN_TESTS: "1"
+        run: cargo test
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: X server
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+      - name: Lint
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Build release
+        run: cargo build --release
+      - name: Test
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" cargo test
