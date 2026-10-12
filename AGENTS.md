@@ -26,5 +26,7 @@ make it differ. Keep that compatibility: subcommands, flags, defaults, messages,
   may outlive the agent session.
 - The session never blocks: UI Automation and AT-SPI calls that can hang run on another thread.
 - `cargo test` must never draw on the screen; tests that do are gated by `BIGARROW_SCREEN_TESTS=1`.
+- Releases: a `vX.Y.Z` tag matching `version` in Cargo.toml runs `release.yml`. `docs/INSTALL.md`
+  downloads its archives from `releases/latest` by name: keep the names.
 - Gates before every commit: `cargo clippy --all-targets -- -D warnings`, `cargo build --release`,
   `cargo test`, on Windows and in a Linux X11 session.

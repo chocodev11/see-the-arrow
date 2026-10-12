@@ -35,7 +35,7 @@ arrow up until the human clicks the switch; then the agent points at the next st
 ## Quick start
 
 ```powershell
-cargo install --path .                      # from a clone of this repository
+cargo install see-the-arrow --locked        # or a prebuilt binary, see Install
 bigarrow point --at 960,540 --text "Click here"
 bigarrow elements --app "Google Chrome" --match Developer
 bigarrow install-skill                      # teaches Claude Code and Codex to use it
@@ -96,9 +96,20 @@ bigarrow stop --all                      # when done
 
 ## Install
 
+Ask your agent (Claude Code, Codex, ...):
+
+```text
+Install see-the-arrow on this machine.
+Follow https://raw.githubusercontent.com/chocodev11/see-the-arrow/main/docs/INSTALL.md
+```
+
+It downloads `bigarrow` for Windows (x64) or Linux (x86-64, glibc 2.35 or newer) from the
+[latest release](https://github.com/chocodev11/see-the-arrow/releases/latest), installs the agent
+skill and shows a first arrow. By hand:
+
 ```powershell
-cargo install --path .        # Rust 1.89 or newer
-bigarrow install-skill        # Claude Code (~/.claude/skills) and Codex (~/.agents/skills)
+cargo install see-the-arrow --locked   # Rust 1.89 or newer
+bigarrow install-skill                 # Claude Code (~/.claude/skills) and Codex (~/.agents/skills)
 ```
 
 Windows 10 or 11 needs nothing else. Linux needs an X11 session; a compositing window manager gives

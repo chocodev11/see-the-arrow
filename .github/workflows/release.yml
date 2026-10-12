@@ -1,0 +1,72 @@
+name: Release
+
+# A tag such as v0.1.0 builds the binaries and publishes them as a GitHub release.
+# docs/INSTALL.md downloads them from releases/latest by name: keep the names.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      # No dependency on the Visual C++ runtime.
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build release
+        run: cargo build --release --locked
+      - name: Package
+        run: |
+          New-Item -ItemType Directory dist/assets/fonts | Out-Null
+          Copy-Item target/release/bigarrow.exe, LICENSE, README.md, THIRD_PARTY_NOTICES.md dist
+          Copy-Item assets/fonts/*-OFL.txt dist/assets/fonts
+          Compress-Archive dist/* bigarrow-x86_64-pc-windows-msvc.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: bigarrow-x86_64-pc-windows-msvc.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Linked against the glibc of Ubuntu 22.04 (2.35): runs on Debian 12, Ubuntu 22.04 and newer.
+    container: ubuntu:22.04
+    steps:
+      - name: Build tools
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gcc libc6-dev
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build release
+        run: cargo build --release --locked
+      - name: Package
+        run: |
+          mkdir -p dist/assets/fonts
+          cp target/release/bigarrow LICENSE README.md THIRD_PARTY_NOTICES.md dist
+          cp assets/fonts/*-OFL.txt dist/assets/fonts
+          tar -czf bigarrow-x86_64-unknown-linux-gnu.tar.gz -C dist bigarrow LICENSE README.md THIRD_PARTY_NOTICES.md assets
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: bigarrow-x86_64-unknown-linux-gnu.tar.gz
+
+  release:
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum bigarrow-* > SHA256SUMS
+          gh release create "$GITHUB_REF_NAME" bigarrow-* SHA256SUMS --repo "$GITHUB_REPOSITORY" \
+            --title "see-the-arrow ${GITHUB_REF_NAME#v}" --generate-notes
